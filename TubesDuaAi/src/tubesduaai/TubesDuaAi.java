@@ -5,6 +5,9 @@
  */
 package tubesduaai;
 
+import weka.core.Instance;
+import weka.core.Instances;
+
 /**
  *
  * @author harry
@@ -12,11 +15,10 @@ package tubesduaai;
 public class TubesDuaAi {
     
     public static void demoNb() throws Exception {
+        Instances dummy = null;
         NB_030 nb = new NB_030();
         nb.DataRead("C:\\Program Files\\Weka-3-8\\data\\iris.arff");
-//        System.out.println(nb.datas);
-        nb.Discretize();
-        nb.MakeModel();
+        nb.buildClassifier(dummy);
     }
 
     /**

@@ -20,19 +20,23 @@ import weka.filters.supervised.attribute.Discretize;
 public class NB_030 implements Classifier {
     
     public Instances datas;
+    public double[][] temp;
     
     public NB_030() {
         
     }
     
-    public Instances Discretize() throws Exception {
+    
+    public void Discretize() throws Exception {
         Discretize discretize = new Discretize();
-        String[] options = new String[2];
-        options[0] = "-R";                                    
-        options[1] = "1";                                     
-        discretize.setOptions(options);
+//        String[] options = new String[4];
+//        options[0] = "-R";
+//        options[1] = "first-last";
+//        options[2] = "-precision";
+//        options[3] = "6";
+//        discretize.setOptions(options);
         discretize.setInputFormat(datas);
-        return Filter.useFilter(datas,discretize);
+        datas = Filter.useFilter(datas,discretize);
     }
     
     public void DataRead(String filepath) throws Exception {
@@ -40,22 +44,48 @@ public class NB_030 implements Classifier {
         datas.setClassIndex(datas.numAttributes()-1);
     }
     
-    public void MakeModel() {
-        System.out.println("============INSTANCES=================");
-        for (int i=0; i < datas.numInstances(); i++) {
-            System.out.println(datas.get(i));
+    public int numOfDistinctVal(double[] arr) {
+        
+        return 0;
+    }
+    
+    public String distinctVals(String[] arr, int index) {
+        return datas.get(index).stringValue(datas.numAttributes()-1);
+    }
+    
+    @Override
+    /**
+     * Make model
+     */
+    public void buildClassifier(Instances i) throws Exception {
+        temp = new double[datas.numInstances()][];
+        Discretize();
+        
+        // Call a cell : <Instances.get(instance_index).stringValues(attr_index)>
+        
+        for (int j=0; j < datas.numInstances(); j++) {
+            for (int k=0; k < datas.numAttributes(); k++) {
+                if (k != datas.numAttributes()-1)
+                    System.out.print(datas.get(j).stringValue(k));
+                else
+                    System.out.print(datas.get(j).stringValue(k));
+            }
+            System.out.println();
+        }
+        
+//        int[][] attr = new int[datas.numAttributes()][];
+        
+        for (int j=0; j < datas.numInstances(); j++) {
+            for (int k=0; k < datas.numAttributes(); k++) {
+                // Sum of all attributes
+                
+            }
         }
     }
 
     @Override
-    public void buildClassifier(Instances i) throws Exception {
-        
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public double classifyInstance(Instance instnc) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return 1.1;
     }
 
     @Override
