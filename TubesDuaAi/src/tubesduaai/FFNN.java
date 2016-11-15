@@ -5,6 +5,7 @@
  */
 package tubesduaai;
 
+import java.util.ArrayList;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -18,7 +19,44 @@ import weka.filters.supervised.attribute.Discretize;
  * @author Nugroho Satriyanto <massatriya@gmail.com>
  */
 public class FFNN implements Classifier{
+    private class perceptron{
+        public perceptron(double w,double b){
+            weight = w;
+            bias = b;
+        }
+        public double weight;
+        public double bias;
+    }
+    
+    /** instances yang akan diolah */
     public Instances datas;
+    /** kumpulan perceptron yang digambarkan sebagai matriks */
+    public ArrayList<ArrayList<perceptron>> perceptrons;
+    /** jumlah perceptron pada hidden layer */
+    public int hidden_perceptron;
+ 
+    public FFNN(String filepath,int hidden_layer) throws Exception {
+        datas = DataSource.read(filepath);
+        datas.setClassIndex(datas.numAttributes()-1);
+        perceptrons = new ArrayList<>();
+    }
+    
+    /** menginisialisasi perceptrons */
+    public void initialize_perceptrons(){
+        int jml_perceptron = (datas.numAttributes()-1)+hidden_perceptron+datas.numClasses();
+        for (int i=0;i<jml_perceptron-1;i++){
+            perceptrons.add(new ArrayList<>());
+            for (int j=0;j<jml_perceptron;j++){
+                if ((i<datas.numAttributes()-1) &&(j<datas.numAttributes()-1)){
+                    // jika i < jml attribut, maka i adalah simpul input, w=0
+                    perceptrons.get(i).add(new perceptron(0.0,0.0));
+                } else if (i==j){
+                    //jika i=j, maka jaraknya 0
+                    perceptrons.get(i).add(new perceptron(0.0,0.0));
+                }
+            }
+        }
+    }
     
     public void DataRead(String filepath) throws Exception {
         datas = DataSource.read(filepath);

@@ -14,8 +14,7 @@ import weka.core.Instances;
 public class TesFFNN {
     public static void tes() throws Exception{
         Instances dummy = null;
-        FFNN nn = new FFNN();
-        nn.DataRead("C:\\Program Files\\Weka-3-8\\data\\iris.arff");
+        FFNN nn = new FFNN("C:\\Program Files\\Weka-3-8\\data\\iris.arff",0);
         boolean[] nom = nn.cek_nominal();
         for (int i=0;i<nom.length;i++){
             System.out.println(nom[i]);
