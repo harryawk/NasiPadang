@@ -6,6 +6,7 @@
 package tubesduaai;
 
 import java.util.ArrayList;
+import java.util.Random;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -18,75 +19,197 @@ import weka.filters.supervised.attribute.Discretize;
  *
  * @author Nugroho Satriyanto <massatriya@gmail.com>
  */
-public class FFNN implements Classifier{
-    private class perceptron{
-        public perceptron(double w,double b){
+public class FFNN implements Classifier {
+
+    private class neuron {
+
+        public neuron (double w, double b) {
             weight = w;
             bias = b;
         }
         public double weight;
         public double bias;
-    }
-    
-    /** instances yang akan diolah */
-    public Instances datas;
-    /** kumpulan perceptron yang digambarkan sebagai matriks */
-    public ArrayList<ArrayList<perceptron>> perceptrons;
-    /** jumlah perceptron pada hidden layer */
-    public int hidden_perceptron;
- 
-    public FFNN(String filepath,int hidden_layer) throws Exception {
-        datas = DataSource.read(filepath);
-        datas.setClassIndex(datas.numAttributes()-1);
-        perceptrons = new ArrayList<>();
-    }
-    
-    /** menginisialisasi perceptrons */
-    public void initialize_perceptrons(){
-        int jml_perceptron = (datas.numAttributes()-1)+hidden_perceptron+datas.numClasses();
-        for (int i=0;i<jml_perceptron-1;i++){
-            perceptrons.add(new ArrayList<>());
-            for (int j=0;j<jml_perceptron;j++){
-                if ((i<datas.numAttributes()-1) &&(j<datas.numAttributes()-1)){
-                    // jika i < jml attribut, maka i adalah simpul input, w=0
-                    perceptrons.get(i).add(new perceptron(0.0,0.0));
-                } else if (i==j){
-                    //jika i=j, maka jaraknya 0
-                    perceptrons.get(i).add(new perceptron(0.0,0.0));
-                }
-            }
+
+        @Override
+        public String toString() {
+            return "(" + weight + "," + bias + ")";
         }
     }
-    
-    public void DataRead(String filepath) throws Exception {
+
+    /**
+     * instances yang akan diolah
+     */
+    public Instances datas;
+    /**
+     * kumpulan perceptron yang digambarkan sebagai matriks
+     */
+    public ArrayList<ArrayList<neuron>> perceptron;
+    public ArrayList<ArrayList<Boolean>> connection;
+    /**
+     * jumlah perceptron pada hidden layer
+     */
+    public int hidden_neuron;
+    Random rnd = new Random();
+    public int jml_perceptron;
+
+    public FFNN(String filepath, int hidden_layer) throws Exception {
         datas = DataSource.read(filepath);
-        datas.setClassIndex(datas.numAttributes()-1);
+        datas.setClassIndex(datas.numAttributes() - 1);
+        this.hidden_neuron=hidden_layer;
+        perceptron = new ArrayList<>();
+        connection = new ArrayList<>();
+        initialize_perceptron();
     }
     
     /**
+     * 
+     * @param x indeks perceptron
+     * @return apakah perceptron indeks x masuk ke hidden layer
+     */
+    boolean is_hidden(int x){
+        if (hidden_neuron==0)
+            return false;
+        else {
+            return (x>datas.numAttributes()-2) && (x<=datas.numAttributes()-2+hidden_neuron);
+        }
+    }
+    
+    /**
+     * 
+     * @param x indeks perceptron
+     * @return apakah perceptron indeks x termasuk input
+     */
+    private boolean is_input(int x){
+        return (x<datas.numAttributes()-1);
+    }
+    
+    /**
+     * 
+     * @param x indeks perceptron
+     * @return apakah perceptron indeks x termasuk output
+     */
+    private boolean is_output(int x){
+        return (x>=jml_perceptron-datas.numClasses());
+    }
+    
+    /**
+     * 
+     * @param i indeks
+     * @param j indeks
+     * @return apakah terkoneksi sinaptik
+     */
+    private boolean is_connected(int i,int j){
+        return connection.get(i).get(j);
+    }
+
+    /**
+     * menginisialisasi perceptron
+     */
+    public void initialize_perceptron() {
+        jml_perceptron = (datas.numAttributes() - 1) + hidden_neuron + datas.numClasses();
+        if (hidden_neuron == 0) {
+            for (int i = 0; i < jml_perceptron; i++) {
+                connection.add(new ArrayList<>());
+                perceptron.add(new ArrayList<>());
+                for (int j = 0; j <= i; j++) {
+                    if ((is_input(i)) && (is_input(j))) {
+                        // jika i < jml attribut, maka i adalah simpul input, w=0
+                        perceptron.get(i).add(new neuron(0.0, 0.0));
+                        connection.get(i).add(false);
+                    } else if (i == j) {
+                        //jika i=j, maka weightnya 0 dan terdapat bias
+                        perceptron.get(i).add(new neuron(0.0, rnd.nextInt(10) + rnd.nextDouble()));
+                        connection.get(i).add(false);
+                    } else {
+                        //selain itu, perceptron mempunyai weight dan tidak mempunyai bias
+                        perceptron.get(i).add(new neuron(rnd.nextInt(10) + rnd.nextDouble(), 0.0));
+                        connection.get(i).add(true);
+                    }
+                }
+            }
+        } else {
+            for (int i = 0; i < jml_perceptron; i++) {
+                perceptron.add(new ArrayList<>());
+                connection.add(new ArrayList<>());
+                for (int j = 0; j <= i; j++) {
+                    if ((is_input(i)) && (is_input(j))) {
+                        // jika i < jml attribut, maka i adalah simpul input, w=0
+                        perceptron.get(i).add(new neuron(0.0, 0.0));
+                        connection.get(i).add(false);
+                    } else if (i == j) {
+                        //jika i=j, maka weightnya 0 dan terdapat bias
+                        perceptron.get(i).add(new neuron(0.0, rnd.nextInt(10) + rnd.nextDouble()));
+                        connection.get(i).add(false);
+                    } else if (((is_input(i))&& (is_hidden(j)))||((is_input(j))&& (is_hidden(i)))){
+                        //i perceptron input j perceptron hidden, maka mempunyai weight
+                        perceptron.get(i).add(new neuron(rnd.nextInt(10) + rnd.nextDouble(), 0.0));
+                        connection.get(i).add(true);
+                    } else if (((is_hidden(i))&&(is_output(j)))||((is_hidden(j))&&(is_output(i)))){
+                        //perceptron mempunyai weight
+                        perceptron.get(i).add(new neuron(rnd.nextInt(10) + rnd.nextDouble(), 0.0));
+                        connection.get(i).add(true);
+                    } else {
+                        perceptron.get(i).add(new neuron(0.0, 0.0));
+                        connection.get(i).add(false);
+                    }
+                }
+            }
+        }
+        copy_init();
+    }
+    
+    /**
+     * menyelesaikan setengah inisialisasi lainnya
+     */
+    private void copy_init(){
+        for (int i = 0; i < jml_perceptron; i++) {
+            for (int j=i+1;j<jml_perceptron;j++){
+                perceptron.get(i).add(perceptron.get(j).get(i));
+                connection.get(i).add(connection.get(j).get(i));
+            }
+        }
+    }
+
+    public void print_perceptron() {
+        System.out.println("i j (weight,bias)");
+        for (int i = 0; i < perceptron.size(); i++) {
+            for (int j = 0; j < perceptron.get(i).size(); j++) {
+                System.out.println(i + " " + j + " " + perceptron.get(i).get(j));
+            }
+        }
+    }
+
+    public void DataRead(String filepath) throws Exception {
+        datas = DataSource.read(filepath);
+        datas.setClassIndex(datas.numAttributes() - 1);
+    }
+
+    /**
      * Fungsi untuk mengecek nominal
+     *
      * @return array yang berisi indeks nominal, true bila nominal
      */
-    public boolean[] cek_nominal(){
+    public boolean[] cek_nominal() {
         boolean[] ret = new boolean[datas.numAttributes()];
         int nom = 0;
-        for (int i=0;i<datas.numAttributes();i++){
-            if (datas.attribute(i).isNominal())
+        for (int i = 0; i < datas.numAttributes(); i++) {
+            if (datas.attribute(i).isNominal()) {
                 ret[i] = true;
-            else
+            } else {
                 ret[i] = false;
+            }
         }
         return ret;
     }
-    
+
     @Override
     /**
      * Make model
      */
     public void buildClassifier(Instances i) throws Exception {
-        
+
     }
-    
+
     @Override
     public double classifyInstance(Instance instnc) throws Exception {
         return 1.1;
