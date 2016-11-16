@@ -55,7 +55,9 @@ public class FFNN implements Classifier {
     public FFNN(String filepath, int hidden_layer) throws Exception {
         datas = DataSource.read(filepath);
         datas.setClassIndex(datas.numAttributes() - 1);
+        this.hidden_perceptron=hidden_layer;
         perceptrons = new ArrayList<>();
+        connection = new ArrayList<>();
         initialize_perceptrons();
     }
     
@@ -68,7 +70,7 @@ public class FFNN implements Classifier {
         if (hidden_perceptron==0)
             return false;
         else {
-            if ((x>=datas.numAttributes()) && (x<datas.numAttributes()+hidden_perceptron))
+            if ((x>datas.numAttributes()-2) && (x<=datas.numAttributes()-2+hidden_perceptron))
                 return true;
             else
                 return false;
@@ -81,9 +83,7 @@ public class FFNN implements Classifier {
      * @return apakah perceptron indeks x termasuk input
      */
     private boolean is_input(int x){
-        if (x<datas.numAttributes()-1)
-            return true;
-        return false;
+        return (x<datas.numAttributes()-1);
     }
     
     /**
@@ -92,9 +92,7 @@ public class FFNN implements Classifier {
      * @return apakah perceptron indeks x termasuk output
      */
     private boolean is_output(int x){
-        if (x>datas.numAttributes()+hidden_perceptron-1)
-            return true;
-        return false;
+        return (x>=jml_perceptron-datas.numClasses());
     }
     
     /**
@@ -116,8 +114,8 @@ public class FFNN implements Classifier {
             for (int i = 0; i < jml_perceptron; i++) {
                 connection.add(new ArrayList<>());
                 perceptrons.add(new ArrayList<>());
-                for (int j = 0; j < jml_perceptron-i; j++) {
-                    if ((i < datas.numAttributes() - 1) && (j < datas.numAttributes() - 1)) {
+                for (int j = 0; j <= i; j++) {
+                    if ((is_input(i)) && (is_input(j))) {
                         // jika i < jml attribut, maka i adalah simpul input, w=0
                         perceptrons.get(i).add(new perceptron(0.0, 0.0));
                         connection.get(i).add(false);
@@ -136,7 +134,7 @@ public class FFNN implements Classifier {
             for (int i = 0; i < jml_perceptron; i++) {
                 perceptrons.add(new ArrayList<>());
                 connection.add(new ArrayList<>());
-                for (int j = 0; j < jml_perceptron-i; j++) {
+                for (int j = 0; j <= i; j++) {
                     if ((is_input(i)) && (is_input(j))) {
                         // jika i < jml attribut, maka i adalah simpul input, w=0
                         perceptrons.get(i).add(new perceptron(0.0, 0.0));
@@ -145,11 +143,11 @@ public class FFNN implements Classifier {
                         //jika i=j, maka weightnya 0 dan terdapat bias
                         perceptrons.get(i).add(new perceptron(0.0, rnd.nextInt(10) + rnd.nextDouble()));
                         connection.get(i).add(false);
-                    } else if ((is_input(i))&& (is_hidden(j))){
+                    } else if (((is_input(i))&& (is_hidden(j)))||((is_input(j))&& (is_hidden(i)))){
                         //i perceptron input j perceptron hidden, maka mempunyai weight
                         perceptrons.get(i).add(new perceptron(rnd.nextInt(10) + rnd.nextDouble(), 0.0));
                         connection.get(i).add(true);
-                    } else if ((is_hidden(i))&&(is_output(j))){
+                    } else if (((is_hidden(i))&&(is_output(j)))||((is_hidden(j))&&(is_output(i)))){
                         //perceptron mempunyai weight
                         perceptrons.get(i).add(new perceptron(rnd.nextInt(10) + rnd.nextDouble(), 0.0));
                         connection.get(i).add(true);
@@ -168,7 +166,7 @@ public class FFNN implements Classifier {
      */
     private void copy_init(){
         for (int i = 0; i < jml_perceptron; i++) {
-            for (int j=jml_perceptron-i;j<jml_perceptron;j++){
+            for (int j=i+1;j<jml_perceptron;j++){
                 perceptrons.get(i).add(perceptrons.get(j).get(i));
                 connection.get(i).add(connection.get(j).get(i));
             }
@@ -176,6 +174,7 @@ public class FFNN implements Classifier {
     }
 
     public void print_perceptrons() {
+        System.out.println("i j (weight,bias)");
         for (int i = 0; i < perceptrons.size(); i++) {
             for (int j = 0; j < perceptrons.get(i).size(); j++) {
                 System.out.println(i + " " + j + " " + perceptrons.get(i).get(j));
