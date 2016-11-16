@@ -16,7 +16,7 @@ public class TesFFNN {
         Instances dummy = null;
         FFNN nn = new FFNN("C:\\Program Files\\Weka-3-8\\data\\iris.arff",2);
         boolean[] nom = nn.cek_nominal();
-        nn.print_perceptrons();
+        nn.print_perceptron();
     }
     
     public static void main(String[] args){
