@@ -29,11 +29,45 @@ public class FFNN implements Classifier {
         }
         public double weight;
         public double bias;
+        public float error;
+        public float output;
 
         @Override
         public String toString() {
-            return "(" + weight + "," + bias + ")";
+            return "(" + weight + "," + bias + "," + error + "," + output + ")";
         }
+    }
+    
+    public boolean is_connected(int i,int j){
+        return connection.get(i).get(j);
+    }
+    
+    /**
+     * 
+     * @param x data ke x
+     */
+    public void hitung_net(int x){
+        System.out.println(datas.get(x).toString());
+        Instance temp = datas.get(x);
+        if (hidden_neuron==0){
+            int i=jml_perceptron-datas.numClasses();
+            for(;is_output(i)&&i<jml_perceptron;i++){
+                float out=0;
+                for(int j=0;is_input(j);j++){
+                    out+=perceptron.get(j).get(i).weight*data[x][j];
+                }
+                perceptron.get(i).get(i).output = out;
+            }
+        }
+    }
+    
+    /**
+     * 
+     * @param x
+     * @return nilai fungsi sigmoid
+     */
+    public float hitung_sigmoid(float x){
+        return (float) (1/(1+Math.exp((double) x)));
     }
 
     /**
@@ -51,6 +85,7 @@ public class FFNN implements Classifier {
     public int hidden_neuron;
     Random rnd = new Random();
     public int jml_perceptron;
+    public double [][] data;
 
     public FFNN(String filepath, int hidden_layer) throws Exception {
         datas = DataSource.read(filepath);
@@ -58,7 +93,15 @@ public class FFNN implements Classifier {
         this.hidden_neuron=hidden_layer;
         perceptron = new ArrayList<>();
         connection = new ArrayList<>();
+        data = new double[datas.numInstances()][datas.numAttributes()-1];
+        to_matrix();
         initialize_perceptron();
+    }
+    
+    public void to_matrix(){
+        for (int i=0;i<datas.numInstances();i++){
+            data[i] = datas.get(i).toDoubleArray();
+        }
     }
     
     /**
@@ -94,12 +137,15 @@ public class FFNN implements Classifier {
     
     /**
      * 
-     * @param i indeks
-     * @param j indeks
-     * @return apakah terkoneksi sinaptik
+     * @return nilai error
      */
-    private boolean is_connected(int i,int j){
-        return connection.get(i).get(j);
+    private double hitung_error(){
+        int i=0;
+        while (!is_output(i))
+            i++;
+        for(;i<jml_perceptron;i++){
+        }
+        return 0.0;
     }
 
     /**
@@ -207,7 +253,9 @@ public class FFNN implements Classifier {
      * Make model
      */
     public void buildClassifier(Instances i) throws Exception {
-
+        if (hidden_neuron==0){
+            hitung_net(3);
+        }
     }
 
     @Override

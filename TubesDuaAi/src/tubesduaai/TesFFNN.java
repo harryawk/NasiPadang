@@ -14,8 +14,9 @@ import weka.core.Instances;
 public class TesFFNN {
     public static void tes() throws Exception{
         Instances dummy = null;
-        FFNN nn = new FFNN("C:\\Program Files\\Weka-3-8\\data\\iris.arff",2);
+        FFNN nn = new FFNN("C:\\Program Files\\Weka-3-8\\data\\iris.arff",0);
         boolean[] nom = nn.cek_nominal();
+        nn.buildClassifier(dummy);
         nn.print_perceptron();
     }
     
