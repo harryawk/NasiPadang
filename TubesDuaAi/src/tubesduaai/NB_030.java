@@ -5,6 +5,13 @@
  */
 package tubesduaai;
 
+import static com.sun.org.apache.xalan.internal.lib.ExsltDynamic.map;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import static jdk.nashorn.internal.objects.NativeArray.map;
+import static jdk.nashorn.internal.objects.NativeDebug.map;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -57,7 +64,7 @@ public class NB_030 implements Classifier {
     /**
      * Make model
      */
-    public void buildClassifier(Instances i) throws Exception {
+    public void buildClassifier(Instances inst) throws Exception {
         temp = new double[datas.numInstances()][];
         Discretize();
         
@@ -67,20 +74,46 @@ public class NB_030 implements Classifier {
             for (int k=0; k < datas.numAttributes(); k++) {
                 if (k != datas.numAttributes()-1)
                     System.out.print(datas.get(j).stringValue(k));
-                else
-                    System.out.print(datas.get(j).stringValue(k));
             }
             System.out.println();
         }
         
-//        int[][] attr = new int[datas.numAttributes()][];
+        // STRUKTUR DATA MODEL
+        HashMap<String, HashMap<String, HashMap<String, Integer>>> map_attribute = new HashMap<String, HashMap<String, HashMap<String, Integer>>>();
+        HashMap<String, HashMap<String, Integer>> map_distinct =  new HashMap<String, HashMap<String, Integer>>();
+        HashMap<String, Integer> map_class = new HashMap<String, Integer>();
         
-        for (int j=0; j < datas.numInstances(); j++) {
-            for (int k=0; k < datas.numAttributes(); k++) {
-                // Sum of all attributes
-                
+        // KEYS UNTUK STRUKTUR DATA
+        String irisVirginica = datas.attribute(datas.classIndex()).value(0);
+        String irisVersiColor = datas.attribute(datas.classIndex()).value(1);
+        String irisSetosa = datas.attribute(datas.classIndex()).value(2);
+        
+        
+        int irisVirginica_ = 0;
+        int irisVersiColor_ = 0;
+        int irisSetosa_ = 0;
+        for (int j=0; j < datas.numAttributes(); j++) {
+            
+            for (int i=0; i < datas.attribute(j).numValues(); i++) {
+                // values @ current attribute
+            }
+            for (int k=0; k < datas.numInstances(); k++) {
+                if (datas.get(k).classValue() == 0.0) {
+                    map_class.put(irisVirginica, ++irisVirginica_);
+                } else if (datas.get(k).classValue() == 1.0) {
+                    map_class.put(irisVersiColor, ++irisVersiColor_);
+                } else if (datas.get(k).classValue() == 2.0) {
+                    map_class.put(irisSetosa, ++irisSetosa_);
+                }
             }
         }
+
+//        for (int j=0; j < datas.numInstances(); j++) {
+//            for (int k=0; k < datas.numAttributes(); k++) {
+//                // Sum of all attributes
+//                
+//            }
+//        }
     }
 
     @Override
