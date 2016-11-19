@@ -5,9 +5,7 @@
  */
 package tubesduaai;
 
-import static com.sun.org.apache.xalan.internal.lib.ExsltDynamic.map;
-import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import static jdk.nashorn.internal.objects.NativeArray.map;
@@ -28,10 +26,11 @@ public class NB_030 implements Classifier {
     
     public Instances datas;
     public double[][] temp;
+    HashMap<String, Integer> map_class;
     
     public NB_030() {
-        
-    }
+        map_class = new HashMap<String, Integer>();
+    }   
     
     
     public void Discretize() throws Exception {
@@ -50,14 +49,18 @@ public class NB_030 implements Classifier {
         datas = DataSource.read(filepath);
         datas.setClassIndex(datas.numAttributes()-1);
     }
-    
-    public int numOfDistinctVal(double[] arr) {
         
-        return 0;
-    }
-    
-    public String distinctVals(String[] arr, int index) {
-        return datas.get(index).stringValue(datas.numAttributes()-1);
+    public String[] distinctVals(int index) {
+        int nums = datas.numDistinctValues(index);
+        String[] dist = new String[nums];
+        int j = 0;
+        for (int i=0; i < datas.numInstances(); i++) {
+            if (!Arrays.asList(dist).contains(datas.get(i).stringValue(index))) {
+                dist[j] = datas.get(i).stringValue(index);
+                j++;
+            }
+        }
+        return dist;
     }
     
     @Override
@@ -69,55 +72,137 @@ public class NB_030 implements Classifier {
         Discretize();
         
         // Call a cell : <Instances.get(instance_index).stringValues(attr_index)>
-        
-        for (int j=0; j < datas.numInstances(); j++) {
-            for (int k=0; k < datas.numAttributes(); k++) {
-                if (k != datas.numAttributes()-1)
-                    System.out.print(datas.get(j).stringValue(k));
-            }
-            System.out.println();
-        }
+//        System.out.println(datas);
         
         // STRUKTUR DATA MODEL
-        HashMap<String, HashMap<String, HashMap<String, Integer>>> map_attribute = new HashMap<String, HashMap<String, HashMap<String, Integer>>>();
-        HashMap<String, HashMap<String, Integer>> map_distinct =  new HashMap<String, HashMap<String, Integer>>();
-        HashMap<String, Integer> map_class = new HashMap<String, Integer>();
+//        HashMap<String, HashMap<String, HashMap<String, Integer>>> map_attribute = new HashMap<String, HashMap<String, HashMap<String, Integer>>>();
+//        HashMap<String, HashMap<String, Integer>> map_distinct =  new HashMap<String, HashMap<String, Integer>>();
+        
         
         // KEYS UNTUK STRUKTUR DATA
         String irisVirginica = datas.attribute(datas.classIndex()).value(0);
         String irisVersiColor = datas.attribute(datas.classIndex()).value(1);
         String irisSetosa = datas.attribute(datas.classIndex()).value(2);
-        
-        
-        int irisVirginica_ = 0;
-        int irisVersiColor_ = 0;
-        int irisSetosa_ = 0;
-        for (int j=0; j < datas.numAttributes(); j++) {
-            
-            for (int i=0; i < datas.attribute(j).numValues(); i++) {
-                // values @ current attribute
-            }
-            for (int k=0; k < datas.numInstances(); k++) {
-                if (datas.get(k).classValue() == 0.0) {
-                    map_class.put(irisVirginica, ++irisVirginica_);
-                } else if (datas.get(k).classValue() == 1.0) {
-                    map_class.put(irisVersiColor, ++irisVersiColor_);
-                } else if (datas.get(k).classValue() == 2.0) {
-                    map_class.put(irisSetosa, ++irisSetosa_);
+                
+
+        for (int j=0; j < datas.numAttributes()-1; j++) {
+            String[] distincts = distinctVals(j);
+            for (int m=0; m < distincts.length; m++) {
+                for (int i=0; i < 3; i++) {
+                    switch (i) {
+                        case 0:
+                            map_class.put(datas.attribute(j).name()+distincts[m]+irisVirginica, 0);
+                            break;
+                        case 1:
+                            map_class.put(datas.attribute(j).name()+distincts[m]+irisVersiColor, 0);
+                            break;
+                        case 2:
+                            map_class.put(datas.attribute(j).name()+distincts[m]+irisSetosa, 0);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
-
-//        for (int j=0; j < datas.numInstances(); j++) {
-//            for (int k=0; k < datas.numAttributes(); k++) {
-//                // Sum of all attributes
-//                
-//            }
-//        }
+////////////////////////////////////////LOOOOOOOOPPPP>????????//////////////////////        
+        System.out.println("Before : ");
+        System.out.println("==============================================");
+        for (int j=0; j < datas.numAttributes()-1; j++) {
+            String[] distincts = distinctVals(j);
+            for (int m=0; m < distincts.length; m++) {
+                for (int i=0; i < 3; i++) {
+                    switch (i) {
+                        case 0:
+//                            System.out.print(datas.get(0).attribute(0).name()+distincts[m]+irisVirginica);
+                            System.out.print(map_class.get(datas.attribute(0).name()+distincts[m]+irisVirginica));
+                            break;
+                        case 1:
+//                            System.out.println(datas.get(0).attribute(0).name()+distincts[m]+irisVersiColor);
+                            System.out.print(map_class.get(datas.attribute(0).name()+distincts[m]+irisVersiColor));
+                            break;
+                        case 2:
+//                            System.out.println(datas.get(0).attribute(0).name()+distincts[m]+irisSetosa);
+                            System.out.print(map_class.get(datas.attribute(0).name()+distincts[m]+irisSetosa));
+                            break;
+                        default:
+                            break;
+                    }
+                    System.out.print(" ");
+                }
+                System.out.println();
+            }
+        }
+        System.out.println("====================================================");
+///////////////////////////////LOOOOPPPPP/////////////////////////////////////////
+        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+        System.out.println(datas.get(0).attribute(0).name());
+        System.out.println(datas.attribute(1).name());
+        System.out.println(datas.attribute(2).name());
+        System.out.println(datas.attribute(3).name());
+        System.out.println(datas.attribute(4).name());
+///////////////////////////////MAPPING//////////////////////////////////////////////
+        for (int j=0; j < datas.numAttributes()-1; j++) {
+            String[] distincts = distinctVals(j);
+            for (int k=0; k < datas.numInstances(); k++) {
+                for (int m=0; m < distincts.length; m++) {
+                    if (datas.get(k).stringValue(j) == distincts[m]) {
+                        if (datas.get(k).classValue() == 0.0) {
+                            int x = map_class.get(datas.get(k).attribute(j).name()+
+                                    distincts[m]+irisVirginica)+1;
+                            map_class.put(datas.get(k).attribute(j).name()+distincts[m]
+                                    +irisVirginica, x);
+                            break;
+                        } else if (datas.get(k).classValue() == 1.0) {
+                            int x = map_class.get(datas.get(k).attribute(j).name()+
+                                            distincts[m]+irisVersiColor)+1;
+                            map_class.put(datas.get(k).attribute(j).name()+distincts[m]
+                                    +irisVersiColor, x);
+                            break;
+                        } else if (datas.get(k).classValue() == 2.0) {
+                            int x = map_class.get(datas.get(k).attribute(j).name()+
+                                            distincts[m]+irisSetosa)+1;
+                            map_class.put(datas.get(k).attribute(j).name()+distincts[m]
+                                    +irisSetosa, x);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+/////////////////////////////////////ENDDOFMAPPING//////////////////////////////////////
+        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+        System.out.println("After : ");
+        System.out.println("==========================");
+        for (int j=0; j < datas.numAttributes()-1; j++) {
+            String[] distincts = distinctVals(j);
+            System.out.println(datas.attribute(j).name());
+            for (int m=0; m < distincts.length; m++) {
+                for (int i=0; i < 3; i++) {
+                    switch (i) {
+                        case 0:
+                            System.out.print(map_class.get(datas.attribute(j).name()+distincts[m]+irisVirginica));
+                            break;
+                        case 1:
+                            System.out.print(map_class.get(datas.attribute(j).name()+distincts[m]+irisVersiColor));
+                            break;
+                        case 2:
+                            System.out.print(map_class.get(datas.attribute(j).name()+distincts[m]+irisSetosa));
+                            break;
+                        default:
+                            break;
+                    }
+                    System.out.print(" ");
+                }
+                System.out.println();
+            }
+        }
+//////////////////////////////////////////////////////////////////////////////////////////////////        
     }
 
     @Override
     public double classifyInstance(Instance instnc) throws Exception {
+        // Pengklasifikasi instance baru
         return 1.1;
     }
 
