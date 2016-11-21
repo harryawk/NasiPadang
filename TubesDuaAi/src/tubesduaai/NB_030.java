@@ -5,6 +5,7 @@
  */
 package tubesduaai;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +23,7 @@ import weka.filters.supervised.attribute.Discretize;
  *
  * @author harry
  */
-public class NB_030 implements Classifier {
+public class NB_030 implements Classifier, Serializable {
     
     public Instances datas;
     public double[][] temp;
