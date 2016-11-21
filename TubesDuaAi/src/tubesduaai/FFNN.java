@@ -38,7 +38,7 @@ public class FFNN implements Classifier, Serializable{
     Random rnd = new Random();
     public int jml_perceptron;
     public double [][] data;
-    public double learning_rate = 0.1;
+    public double learning_rate = 0.5;
     
     private class neuron implements Serializable{
 
@@ -279,20 +279,20 @@ public class FFNN implements Classifier, Serializable{
         return ret;
     }
 
-    @Override
+    //@Override
     /**
      * Make model
      */
     public void buildClassifier(Instances x) throws Exception {
         if (hidden_neuron==0){
-            for(int i=0;i<x.numInstances();i++){
-                hitung_error(i);
-            }
-//            hitung_error(0);
+//            for(int i=0;i<x.numInstances();i++){
+//                hitung_error(i);
+//            }
+            hitung_error(0);
         }
     }
 
-    @Override
+    //@Override
     public double classifyInstance(Instance instnc) throws Exception {
         double[] temp = instnc.toDoubleArray();
         int first = 0;
@@ -316,17 +316,21 @@ public class FFNN implements Classifier, Serializable{
         return (double) (imax-first);
     }
 
-    @Override
+    //@Override
     public double[] distributionForInstance(Instance instnc) throws Exception {
+        double temp = classifyInstance(instnc);
         int x = 3;
         double[] ret = new double[x];
-        for (int i=0;i<x;i++)
-            ret[i] = 1.0/x;
+        
+        for (int i=0;i<x;i++){
+            ret[i] = (1-0.5)/(x-1);
+        }
+        ret[(int) temp] = 0.5;
         return ret;
     }
 
     @Override
     public Capabilities getCapabilities() {
-        throw new UnsupportedOperationException("get cap"); //To change body of generated methods, choose Tools | Templates.
+        return null;
     }
 }
