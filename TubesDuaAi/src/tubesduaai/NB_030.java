@@ -28,6 +28,7 @@ public class NB_030 implements Classifier {
     public double[][] temp;
     public HashMap<String, Float> map;
     public String[][] string;
+    public Float[] num;
     
     public NB_030() {
         map = new HashMap<String, Float>();
@@ -146,7 +147,7 @@ public class NB_030 implements Classifier {
         System.out.println(datas.attribute(4).name());
 
 ///////////////////////////////MAPPING//////////////////////////////////////////////
-        Float[] num = new Float[datas.numClasses()];
+        num = new Float[datas.numClasses()];
         for (int j=0; j < datas.numClasses(); j++) {
             num[j] = new Float(0);
         }
@@ -268,28 +269,88 @@ public class NB_030 implements Classifier {
         }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         ////////////////// CALCULATE ACCURACY AND CLASSIFY ACCURACY //////////////////////////////////
-//////END OF METHOD////////////////////////////////////////////////////////////////////////////////////////////        
+        /////////////////MEMASUKKAN KELAS MENURUT MODEL KE ARRAY
+//        Double[] hasilTraining = new Double[datas.numInstances()];
+//        for (int i=0; i <  datas.numInstances(); i++) {
+//            /// CALCULATION OF PROBABILITY
+//            hasilTraining[i] = 1.0;
+//            /// KEYS UNTUK KE MAP
+//            double current_argmax;
+//            for (int k=0; k < datas.numClasses(); k++) {
+//                current_argmax = 0.0;
+//                for (int j=0; j  < datas.numAttributes()-1; j++) {
+//                    String atribut = datas.attribute(j).name();
+//                    System.out.println("atribut " + atribut);
+//                    String value = datas.get(i).stringValue(j);
+//                    System.out.println("value " + value);
+//                    String kelas = datas.classAttribute().value(k);
+//                    System.out.println("kelas " + kelas);
+//                    hasilTraining[i] *= map.get(atribut+value+kelas);
+//                }
+//                if (current_argmax < hasilTraining[i]) current_argmax = hasilTraining[i];
+//            }
+//            
+////            hasilTraining[i] *= ;
+//            System.out.println("hasil training " + i + " : " + hasilTraining[i]);
+//        }
+        ////////////////////
+//        for (int i=0; i < datas.numInstances(); i++) {
+////            if (datas.get(i).stringValue(datas.classIndex()) == )
+//        }
+//////END OF METHOD////////////////////////////////////////////////////////////////////////////////////////////
     }
 
     @Override
     public double classifyInstance(Instance instnc) throws Exception {
         // Pengklasifikasi instance baru
         int NUM_CLASSES = datas.classAttribute().numValues();
-        
+//        System.out.println("------------------------------");
+//        System.out.println(datas.get(1));
+//        System.out.println(datas.get(1).stringValue(2));
         // Probability of classes
-//        for (int i=0; i < NUM_CLASSES; i++) { // arg max (vj E enum.attributes(datas))
-//            
-//        }
-        return 1.1;
+        int arg = 0;
+        Double argmax = 0.0;
+        Double temp = 1.0;
+        for (int i=0; i < NUM_CLASSES; i++) { // arg max (vj E enum.attributes(datas))
+            // P(kelas)*P(atribut|kelas)
+            temp = ((new Double(num[i]))/datas.numInstances());
+            for (int j=0; j < datas.numAttributes()-1; j++) {
+//                System.out.println("--------------");
+//                System.out.println(map.get(instnc.attribute(j).name()+instnc.stringValue(j)+datas.classAttribute().value(i)));
+                temp *= map.get(instnc.attribute(j).name()+instnc.stringValue(j)+datas.classAttribute().value(i));
+            }
+            if (temp > argmax) {
+                argmax = temp;
+                arg = i;
+            }
+        }
+        switch (arg) {
+            case 0 :
+                return 0.0;
+            case 1 :
+                return 1.0;
+            case 2 :
+                return 2.0;
+            default:
+                return 0.0;
+        }
     }
 
     @Override
     public double[] distributionForInstance(Instance instnc) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        double temp = classifyInstance(instnc);
+        int x = 3;
+        double[] ret = new double[x];
+        
+        for (int i=0;i<x;i++){
+            ret[i] = (1-0.5)/(x-1);
+        }
+        ret[(int) temp] = 0.5;
+        return ret;
     }
 
     @Override
     public Capabilities getCapabilities() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return null;
     }
 }
