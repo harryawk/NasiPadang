@@ -38,8 +38,9 @@ public class FFNN implements Classifier, Serializable{
     Random rnd = new Random();
     public int jml_perceptron;
     public double [][] data;
-    public double learning_rate = 0.01;
+    public double learning_rate = 0.1;
     public float treserr = 0.5f;
+    public float perc;
     
     private class neuron implements Serializable{
 
@@ -97,6 +98,7 @@ public class FFNN implements Classifier, Serializable{
         this.hidden_neuron=hidden_layer;
         perceptron = new ArrayList<>();
         connection = new ArrayList<>();
+        perc = 1.0f/datas.numClasses();
         data = new double[datas.numInstances()][datas.numAttributes()-1];
         to_matrix();
         initialize_perceptron();
@@ -136,11 +138,16 @@ public class FFNN implements Classifier, Serializable{
      * @return apakah perceptron indeks x termasuk output
      */
     private boolean is_output(int x){
-        return (x>=jml_perceptron-datas.numClasses());
+        return (x==jml_perceptron-1);
     }
     
-    private boolean cek_kelas(){
-        return true;
+    private boolean cek_kelas(double out,int desired){
+        
+        return ((out>desired*perc)&&(out<=(desired+1)*perc));
+    }
+    
+    private double get_kelas(float x){
+        return (x/perc);
     }
     
     /**
@@ -159,7 +166,10 @@ public class FFNN implements Classifier, Serializable{
             if (perceptron.get(i).get(i).output>perceptron.get(imax).get(imax).output)
                 imax = i;
         }
-        if (imax-first != (int) datas.get(x).classValue()){
+        int desired = (int) datas.get(x).classValue();
+        //System.out.println(perceptron.get(datas.numAttributes()-1).get(datas.numAttributes()-1).output+" - "+desired);
+        if (!cek_kelas(perceptron.get(datas.numAttributes()-1).get(datas.numAttributes()-1).output,desired)){
+            //System.out.println("beda");
             for(int j=first;j<jml_perceptron;j++){
                 if (j==imax){
                     perceptron.get(j).get(j).error = (float) Math.pow(( perceptron.get(j).get(j).output - 1),2.0);
@@ -170,11 +180,7 @@ public class FFNN implements Classifier, Serializable{
             for (int j=0;is_input(j);j++){
                 for (int k=first;k<jml_perceptron;k++){
                     if (perceptron.get(k).get(k).error!=0){
-                        int kk=0;
-                        if (k==imax)
-                            kk=1;
-                        if (perceptron.get(k).get(k).error>treserr)
-                            perceptron.get(j).get(k).weight = perceptron.get(j).get(k).weight+learning_rate*(kk-perceptron.get(k).get(k).output)*data[x][j];
+                        perceptron.get(j).get(k).weight = perceptron.get(j).get(k).weight+learning_rate*(desired*perc-perceptron.get(k).get(k).output)*data[x][j];
                     }
                 }
             }
@@ -185,7 +191,7 @@ public class FFNN implements Classifier, Serializable{
      * menginisialisasi perceptron
      */
     public void initialize_perceptron() {
-        jml_perceptron = (datas.numAttributes() - 1) + hidden_neuron + datas.numClasses();
+        jml_perceptron = (datas.numAttributes() - 1) + hidden_neuron + 1;
         if (hidden_neuron == 0) {
             for (int i = 0; i < jml_perceptron; i++) {
                 connection.add(new ArrayList<>());
@@ -201,7 +207,7 @@ public class FFNN implements Classifier, Serializable{
                         connection.get(i).add(false);
                     } else {
                         //selain itu, perceptron mempunyai weight dan tidak mempunyai bias
-                        perceptron.get(i).add(new neuron(rnd.nextInt(10) + rnd.nextDouble(), 0.0));
+                        perceptron.get(i).add(new neuron(rnd.nextDouble()-0.5, 0.0));
                         connection.get(i).add(true);
                     }
                 }
@@ -287,7 +293,7 @@ public class FFNN implements Classifier, Serializable{
      */
     public void buildClassifier(Instances x) throws Exception {
         if (hidden_neuron==0){
-            for(int i=0;i<50;i++){
+            for(int i=0;i<150;i++){
                 hitung_error(i);
             }
 //            hitung_error(0);
@@ -297,6 +303,7 @@ public class FFNN implements Classifier, Serializable{
     //@Override
     public double classifyInstance(Instance instnc) throws Exception {
         double[] temp = instnc.toDoubleArray();
+        float ret=0;
         int first = 0;
         while (!(is_output(first)))
             first++;
@@ -309,13 +316,10 @@ public class FFNN implements Classifier, Serializable{
                     out+=perceptron.get(j).get(i).weight*temp[j];
                 }
                 perceptron.get(i).get(i).output = hitung_sigmoid(out);
+                ret = hitung_sigmoid(out);
             }
         }
-        for (int i = first+1;i<jml_perceptron;i++){
-            if (perceptron.get(i).get(i).output > perceptron.get(imax).get(imax).output)
-                imax=i;
-        }
-        return (double) (imax-first);
+        return get_kelas(ret);
     }
 
     //@Override
