@@ -5,6 +5,7 @@
  */
 package tubesduaai;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 import weka.classifiers.Classifier;
@@ -19,7 +20,7 @@ import weka.filters.supervised.attribute.Discretize;
  *
  * @author Nugroho Satriyanto <massatriya@gmail.com>
  */
-public class FFNN implements Classifier {
+public class FFNN implements Classifier, Serializable{
 
     /**
      * instances yang akan diolah
@@ -39,7 +40,7 @@ public class FFNN implements Classifier {
     public double [][] data;
     public double learning_rate = 0.1;
     
-    private class neuron {
+    private class neuron implements Serializable{
 
         public neuron (double w, double b) {
             weight = w;
@@ -317,11 +318,15 @@ public class FFNN implements Classifier {
 
     @Override
     public double[] distributionForInstance(Instance instnc) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int x = 3;
+        double[] ret = new double[x];
+        for (int i=0;i<x;i++)
+            ret[i] = 1.0/x;
+        return ret;
     }
 
     @Override
     public Capabilities getCapabilities() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("get cap"); //To change body of generated methods, choose Tools | Templates.
     }
 }
