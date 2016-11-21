@@ -26,10 +26,11 @@ public class NB_030 implements Classifier {
     
     public Instances datas;
     public double[][] temp;
-    HashMap<String, Integer> map_class;
+    public HashMap<String, Float> map;
+    public String[][] string;
     
     public NB_030() {
-        map_class = new HashMap<String, Integer>();
+        map = new HashMap<String, Float>();
     }   
     
     
@@ -48,6 +49,7 @@ public class NB_030 implements Classifier {
     public void DataRead(String filepath) throws Exception {
         datas = DataSource.read(filepath);
         datas.setClassIndex(datas.numAttributes()-1);
+        string = new String[datas.numAttributes()][];
     }
         
     public String[] distinctVals(int index) {
@@ -72,7 +74,6 @@ public class NB_030 implements Classifier {
         Discretize();
         
         // Call a cell : <Instances.get(instance_index).stringValues(attr_index)>
-//        System.out.println(datas);
         
         // STRUKTUR DATA MODEL
 //        HashMap<String, HashMap<String, HashMap<String, Integer>>> map_attribute = new HashMap<String, HashMap<String, HashMap<String, Integer>>>();
@@ -84,20 +85,21 @@ public class NB_030 implements Classifier {
         String irisVersiColor = datas.attribute(datas.classIndex()).value(1);
         String irisSetosa = datas.attribute(datas.classIndex()).value(2);
                 
-
+        // INSERT DATA KE STRUKTUR DATA
         for (int j=0; j < datas.numAttributes()-1; j++) {
             String[] distincts = distinctVals(j);
+            System.out.println(datas.get(j).attribute(j));
             for (int m=0; m < distincts.length; m++) {
                 for (int i=0; i < 3; i++) {
                     switch (i) {
                         case 0:
-                            map_class.put(datas.attribute(j).name()+distincts[m]+irisVirginica, 0);
+                            map.put(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(0), new Float(1));
                             break;
                         case 1:
-                            map_class.put(datas.attribute(j).name()+distincts[m]+irisVersiColor, 0);
+                            map.put(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(1), new Float(1));
                             break;
                         case 2:
-                            map_class.put(datas.attribute(j).name()+distincts[m]+irisSetosa, 0);
+                            map.put(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(2), new Float(1));
                             break;
                         default:
                             break;
@@ -105,25 +107,26 @@ public class NB_030 implements Classifier {
                 }
             }
         }
-////////////////////////////////////////LOOOOOOOOPPPP>????????//////////////////////        
+////DEBUGGING : ////////////////////////////////////LOOOOOOOOPPPP>????????//////////////////////        
         System.out.println("Before : ");
         System.out.println("==============================================");
         for (int j=0; j < datas.numAttributes()-1; j++) {
             String[] distincts = distinctVals(j);
+            System.out.println(datas.attribute(j).name());
             for (int m=0; m < distincts.length; m++) {
                 for (int i=0; i < 3; i++) {
                     switch (i) {
                         case 0:
 //                            System.out.print(datas.get(0).attribute(0).name()+distincts[m]+irisVirginica);
-                            System.out.print(map_class.get(datas.attribute(0).name()+distincts[m]+irisVirginica));
+                            System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(0)));
                             break;
                         case 1:
 //                            System.out.println(datas.get(0).attribute(0).name()+distincts[m]+irisVersiColor);
-                            System.out.print(map_class.get(datas.attribute(0).name()+distincts[m]+irisVersiColor));
+                            System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(1)));
                             break;
                         case 2:
 //                            System.out.println(datas.get(0).attribute(0).name()+distincts[m]+irisSetosa);
-                            System.out.print(map_class.get(datas.attribute(0).name()+distincts[m]+irisSetosa));
+                            System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(2)));
                             break;
                         default:
                             break;
@@ -134,43 +137,109 @@ public class NB_030 implements Classifier {
             }
         }
         System.out.println("====================================================");
-///////////////////////////////LOOOOPPPPP/////////////////////////////////////////
+////DEBUGGING : ///////////////////////////LOOOOPPPPP/////////////////////////////////////////
         System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
         System.out.println(datas.get(0).attribute(0).name());
         System.out.println(datas.attribute(1).name());
         System.out.println(datas.attribute(2).name());
         System.out.println(datas.attribute(3).name());
         System.out.println(datas.attribute(4).name());
+
 ///////////////////////////////MAPPING//////////////////////////////////////////////
+        Float[] num = new Float[datas.numClasses()];
+        for (int j=0; j < datas.numClasses(); j++) {
+            num[j] = new Float(0);
+        }
+        System.out.println(datas.classAttribute().value(0));
+        System.out.println(datas.classAttribute().value(1));
+        System.out.println(datas.classAttribute().value(2));
+        for (int k=0; k < datas.numInstances(); k++) {
+            if (datas.get(k).stringValue(datas.classIndex()).equals(datas.classAttribute().value(0))) {
+                num[0] += 1;
+            } else if (datas.get(k).stringValue(datas.classIndex()).equals(datas.classAttribute().value(1))) {
+                num[1] += 1;
+            } else if (datas.get(k).stringValue(datas.classIndex()).equals(datas.classAttribute().value(2))) {
+                num[2] += 1;
+            }
+        }
+        Float y;
         for (int j=0; j < datas.numAttributes()-1; j++) {
             String[] distincts = distinctVals(j);
+            string[j] = distincts;
             for (int k=0; k < datas.numInstances(); k++) {
                 for (int m=0; m < distincts.length; m++) {
                     if (datas.get(k).stringValue(j) == distincts[m]) {
-                        if (datas.get(k).classValue() == 0.0) {
-                            int x = map_class.get(datas.get(k).attribute(j).name()+
-                                    distincts[m]+irisVirginica)+1;
-                            map_class.put(datas.get(k).attribute(j).name()+distincts[m]
-                                    +irisVirginica, x);
+                        if (datas.get(k).stringValue(datas.classAttribute()) == datas.classAttribute().value(0)) {
+                            Float x = map.get(datas.get(k).attribute(j).name()+
+                                    distincts[m]+datas.classAttribute().value(0))+ 1;
+                            map.put(datas.get(k).attribute(j).name()+distincts[m]
+                                    +datas.classAttribute().value(0), x);
                             break;
-                        } else if (datas.get(k).classValue() == 1.0) {
-                            int x = map_class.get(datas.get(k).attribute(j).name()+
-                                            distincts[m]+irisVersiColor)+1;
-                            map_class.put(datas.get(k).attribute(j).name()+distincts[m]
-                                    +irisVersiColor, x);
+                        } else if (datas.get(k).stringValue(datas.classAttribute()) == datas.classAttribute().value(1)) {
+                            Float x = map.get(datas.get(k).attribute(j).name()+
+                                            distincts[m]+datas.classAttribute().value(1))+1;
+                            map.put(datas.get(k).attribute(j).name()+distincts[m]
+                                    +datas.classAttribute().value(1), x);
                             break;
-                        } else if (datas.get(k).classValue() == 2.0) {
-                            int x = map_class.get(datas.get(k).attribute(j).name()+
-                                            distincts[m]+irisSetosa)+1;
-                            map_class.put(datas.get(k).attribute(j).name()+distincts[m]
-                                    +irisSetosa, x);
+                        } else if (datas.get(k).stringValue(datas.classAttribute()) == datas.classAttribute().value(2)) {
+                            Float x = map.get(datas.get(k).attribute(j).name()+
+                                            distincts[m]+datas.classAttribute().value(2))+1;
+                            map.put(datas.get(k).attribute(j).name()+distincts[m]
+                                    +datas.classAttribute().value(2), x);
                             break;
                         }
                     }
                 }
             }
         }
-/////////////////////////////////////ENDDOFMAPPING//////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        for (int j=0; j < datas.numAttributes()-1; j++) {
+            String[] distincts = distinctVals(j);
+            System.out.println(datas.attribute(j).name());
+            for (int m=0; m < distincts.length; m++) {
+                for (int i=0; i < 3; i++) {
+                    switch (i) {
+                        case 0:
+//                            System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(0)));
+                            y = map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(0));
+                            System.out.println(y/num[0]);
+                            map.put(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(0), y/num[0]);
+                            break;
+                        case 1:
+//                            System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(1)));
+                            y = map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(1));
+                            System.out.println(y/num[1]);
+                            map.put(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(1), y/num[1]);
+                            break;
+                        case 2:
+//                            System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(2)));
+                            y = map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(2));
+                            System.out.println(y/num[2]);
+                            map.put(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(2), y/num[2]);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        System.out.println(num[0]);
+        System.out.println(num[1]);
+        System.out.println(num[2]);
+///////////////////////////CALCULATING ACCURACY///////////////////////////////////////////////
+        for (int i=0; i < datas.numInstances(); i++) {
+            float[] argmax = new float[3];
+            for (int q=0; q < datas.numClasses(); q++) {
+                float prob = 0;
+                
+            }
+        }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+/////DEBUGGING : ////////////////////////////////ENDDOFMAPPING//////////////////////////////////////
         System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
         System.out.println("After : ");
         System.out.println("==========================");
@@ -181,13 +250,13 @@ public class NB_030 implements Classifier {
                 for (int i=0; i < 3; i++) {
                     switch (i) {
                         case 0:
-                            System.out.print(map_class.get(datas.attribute(j).name()+distincts[m]+irisVirginica));
+                            System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(0)));
                             break;
                         case 1:
-                            System.out.print(map_class.get(datas.attribute(j).name()+distincts[m]+irisVersiColor));
+                            System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(1)));
                             break;
                         case 2:
-                            System.out.print(map_class.get(datas.attribute(j).name()+distincts[m]+irisSetosa));
+                            System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(2)));
                             break;
                         default:
                             break;
@@ -197,12 +266,20 @@ public class NB_030 implements Classifier {
                 System.out.println();
             }
         }
-//////////////////////////////////////////////////////////////////////////////////////////////////        
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////// CALCULATE ACCURACY AND CLASSIFY ACCURACY //////////////////////////////////
+//////END OF METHOD////////////////////////////////////////////////////////////////////////////////////////////        
     }
 
     @Override
     public double classifyInstance(Instance instnc) throws Exception {
         // Pengklasifikasi instance baru
+        int NUM_CLASSES = datas.classAttribute().numValues();
+        
+        // Probability of classes
+//        for (int i=0; i < NUM_CLASSES; i++) { // arg max (vj E enum.attributes(datas))
+//            
+//        }
         return 1.1;
     }
 
