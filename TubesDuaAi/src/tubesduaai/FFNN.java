@@ -74,7 +74,7 @@ public class FFNN implements Classifier, Serializable {
     public void save_model() {
         try {
             
-            FileWriter file = new FileWriter("coba.txt");
+            FileWriter file = new FileWriter("coba2.txt");
             BufferedWriter bw = new BufferedWriter(file);
             for (int i=0;i<perceptron.size();i++){
                 for (int j=0;j<perceptron.get(i).size();j++){
@@ -91,7 +91,7 @@ public class FFNN implements Classifier, Serializable {
 
     public void load_model() {
         try {
-            FileReader file = new FileReader("coba.txt");
+            FileReader file = new FileReader("coba2.txt");
             BufferedReader br = new BufferedReader(file);
             String temp;
             int i=0;
@@ -135,8 +135,8 @@ public class FFNN implements Classifier, Serializable {
         return (float) (1 / (1 + Math.exp((double) -x)));
     }
 
-    public FFNN(String filepath, int hidden_layer) throws Exception {
-        datas = DataSource.read(filepath);
+    public FFNN(Instances x, int hidden_layer) throws Exception {
+        datas = x;
         datas.setClassIndex(datas.numAttributes() - 1);
         this.hidden_neuron = hidden_layer;
         perceptron = new ArrayList<>();
@@ -190,6 +190,8 @@ public class FFNN implements Classifier, Serializable {
     }
 
     private double get_kelas(float x) {
+        if (x==1)
+            return datas.numClasses()-1;
         return Math.floor(x / perc);
     }
 
@@ -338,8 +340,10 @@ public class FFNN implements Classifier, Serializable {
      */
     public void buildClassifier(Instances x) throws Exception {
         if (hidden_neuron == 0) {
-            for (int i = 0; i < 150; i++) {
-                hitung_error(i);
+            for (int epoch=0;epoch<datas.numInstances()*20;epoch++){
+                for (int i = 0; i < 150; i++) {
+                    hitung_error(i);
+                }
             }
 //            hitung_error(0);
         }
