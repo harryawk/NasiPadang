@@ -7,6 +7,9 @@ package tubesduaai;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.Serializable;
+import java.util.Random;
+import weka.classifiers.Evaluation;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -15,9 +18,16 @@ import weka.core.Instances;
  *
  * @author Nugroho Satriyanto <massatriya@gmail.com>
  */
-public class TesFFNN {
+public class TesFFNN{
 
     public static Instances data;
+    public static Evaluation eval;
+    
+    public static Evaluation cross_validation(FFNN x) throws Exception{
+        eval = new Evaluation(data);
+        eval.crossValidateModel(x, data, 10, new Random(1));
+        return eval;
+    }
 
     public static void tes() throws Exception {
         BufferedReader reader = new BufferedReader(new FileReader("C:\\Program Files\\Weka-3-8\\data\\iris.arff"));
@@ -30,6 +40,8 @@ public class TesFFNN {
         boolean[] nom = nn.cek_nominal();
         nn.buildClassifier(data);
         nn.print_perceptron();
+        eval = cross_validation(nn);
+        System.out.println(eval.toSummaryString("\nResults\n======\n", false));
         double[] attValues1 = {5.1,3.5,1.4,0.2};
         Instance i1 = new DenseInstance(1.0, attValues1);
         double[] attValues2 = {7.0,3.2,4.7,1.4};
