@@ -5,25 +5,31 @@
  */
 package tubesduaai;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import static jdk.nashorn.internal.objects.NativeArray.map;
 import static jdk.nashorn.internal.objects.NativeDebug.map;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
-import weka.filters.supervised.attribute.Discretize;
+import weka.filters.unsupervised.attribute.Discretize;
+
 
 /**
  *
  * @author harry
  */
-public class NB_030 implements Classifier, Serializable {
+public class NB_030 extends AbstractClassifier implements Classifier, Serializable {
     
     public Instances datas;
     public Instances data_test;
@@ -37,8 +43,50 @@ public class NB_030 implements Classifier, Serializable {
         map = new HashMap<String, Float>();
     }   
     
+    public void save_model() {
+        try {
+            
+            FileWriter file = new FileWriter("coba2.txt");
+            BufferedWriter bw = new BufferedWriter(file);
+            for (int j=0; j < datas.numAttributes(); j++) {
+            if (j != datas.classIndex()) {
+                String[] distincts = distinctVals(j);
+                System.out.println(datas.attribute(j).name());
+                    for (int m=0; m < distincts.length; m++) {
+                        for (int i=0; i < NUM_LABELS; i++) {
+                            bw.write(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i)).toString());
+                            bw.write(" ");
+                        }
+                        bw.write("\n");
+                    }
+                }
+            }
+            bw.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    public void load_model() {
+        try {
+            FileReader file = new FileReader("coba2.txt");
+            BufferedReader br = new BufferedReader(file);
+            String temp;
+            int i=0;
+            while ((temp = br.readLine()) != null){
+                String[] part = temp.split(" ");
+                for (int j=0;j<part.length;j++) {
+                    perceptron.get(i).get(j).weight = Double.parseDouble(part[j]);
+                }
+                System.out.println();
+                i++;
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
     
-    public void Discretize() throws Exception {
+    public void Discretize(String instncs) throws Exception {
         Discretize discretize = new Discretize();
         String[] options = new String[6];
 //        options[0] = "-R";                                    
@@ -62,8 +110,14 @@ public class NB_030 implements Classifier, Serializable {
 //        discretize.setOptions(options);
 //        discretize.setUseBetterEncoding(true);
 //        System.out.println(discretize.useBinNumbersTipText());
-        discretize.setInputFormat(datas);
-        datas = Filter.useFilter(datas,discretize);
+        if (instncs.equals("datas")) {
+            discretize.setInputFormat(datas);
+            datas = Filter.useFilter(datas,discretize);
+        } else if (instncs.equals("data_test")) {
+            discretize.setInputFormat(data_test);
+            data_test = Filter.useFilter(data_test,discretize);
+        }
+        
     }
     
     public void DataRead(String filepath, int index, int test) throws Exception {
@@ -77,6 +131,7 @@ public class NB_030 implements Classifier, Serializable {
         } else {
             data_test = DataSource.read(filepath);
             data_test.setClassIndex(index);
+            Discretize("data_test");
         }
     }
         
@@ -99,7 +154,7 @@ public class NB_030 implements Classifier, Serializable {
      */
     public void buildClassifier(Instances inst) throws Exception {
         temp = new double[datas.numInstances()][];
-        Discretize();
+        Discretize("datas");
                         
         // INSERT DATA KE STRUKTUR DATA
 //        for (int j=0; j < datas.numAttributes()-1; j++) {
@@ -114,7 +169,7 @@ public class NB_030 implements Classifier, Serializable {
                 }
             }
         }
-        System.out.println("atribute 2 : " + datas.get(0).stringValue(12));
+//        System.out.println("atribute 2 : " + datas.attribute(2).toString());
 ////DEBUGGING : /////////FOR DEBUG PURPOSE///////////////////////////LOOOOOOOOPPPP>????????//////////////////////        
 //        System.out.println("Before : ");
 //        System.out.println("==============================================");
@@ -132,7 +187,7 @@ public class NB_030 implements Classifier, Serializable {
 //                }
 //            }
 //        }
-//        System.out.println("====================================================");
+        System.out.println("====================================================");
 ////DEBUGGING : ///////////////////////////FOR DEBUG PURPOSE///////////////////////////////////////
 //        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
 //        System.out.println(datas.get(0).attribute(0).name());
@@ -217,19 +272,20 @@ public class NB_030 implements Classifier, Serializable {
 
 ///////FOR DEBUG PURPOSE////////////////////////////////////////////////////////////////////////////////////////////
 /////DEBUGGING : ////////////////////////////////ENDDOFMAPPING//////////////////////////////////////
-//        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-//        System.out.println("After : ");
-//        System.out.println("==========================");
+        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+        System.out.println("After : ");
+        System.out.println("==========================");
         for (int j=0; j < datas.numAttributes(); j++) {
             if (j != datas.classIndex()) {
                 String[] distincts = distinctVals(j);
-//                System.out.println(datas.attribute(j).name());
+                System.out.println(datas.attribute(j).name());
                 for (int m=0; m < distincts.length; m++) {
                     for (int i=0; i < NUM_LABELS; i++) {
-//                        System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i)));
-//                        System.out.print(" ");
+                        System.out.print(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i) +  " ");
+                        System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i)));
+                        System.out.print(" ");
                     }
-//                    System.out.println();
+                    System.out.println();
                 }
             }
         }
@@ -280,12 +336,23 @@ public class NB_030 implements Classifier, Serializable {
         Double temp = 1.0;
         for (int i=0; i < NUM_CLASSES; i++) { // arg max (vj E enum.attributes(datas))
             // P(kelas)*P(atribut|kelas)
+//            System.out.println(i);
             temp = ((new Double(num[i]))/datas.numInstances());
             for (int j=0; j < datas.numAttributes(); j++) {
                 if (j != datas.classIndex()) {
-    //                System.out.println("--------------");
-    //                System.out.println(map.get(instnc.attribute(j).name()+instnc.stringValue(j)+datas.classAttribute().value(i)));
-                    temp *= map.get(instnc.attribute(j).name()+instnc.stringValue(j)+datas.classAttribute().value(i));
+//                    System.out.print("temp = "+ temp + " ; i = " + i + " ; j = " + j + " ; name = " + instnc.attribute(30).name() + " ; value = " + instnc.stringValue(30));
+//                    System.out.println(" ; debug : " + instnc.classAttribute().value(1));
+////                    System.out.println("i = " + i);
+////                    System.out.println("j = " + j);
+////                    System.out.println("--------------");
+////                    System.out.println(map.get(instnc.attribute(j).name()+instnc.stringValue(j)+datas.classAttribute().value(i)));
+////                    System.out.println("--------------");
+////                    System.out.println(datas.classAttribute().value(i));
+//                    System.out.print("instnc.attribute("+j+").name()+instnc.stringValue("+j+")+instnc.classAttribute().value("+i + ") ");
+                    System.out.print(instnc.attribute(j).name()+instnc.stringValue(j)+instnc.classAttribute().value(i));
+                    System.out.println(map.get(instnc.attribute(j).name()+instnc.stringValue(j)+instnc.classAttribute().value(i)));
+                    
+                    temp *= map.get(instnc.attribute(j).name()+instnc.stringValue(j)+instnc.classAttribute().value(i));
                 }
             }
             if (temp > argmax) {
@@ -308,18 +375,36 @@ public class NB_030 implements Classifier, Serializable {
     @Override
     public double[] distributionForInstance(Instance instnc) throws Exception {
         double temp = classifyInstance(instnc);
-        int x = 3;
+        int x = data_test.classAttribute().numValues();
         double[] ret = new double[x];
         
         for (int i=0;i<x;i++){
             ret[i] = (1-0.5)/(x-1);
         }
-        ret[(int) temp] = 0.5;
+        ret[(int) temp] = 0.2;
         return ret;
     }
 
     @Override
     public Capabilities getCapabilities() {
-        return null;
+        return super.getCapabilities();
+//        Capabilities result = 
+//        Capabilities result = super.getCapabilities();
+//        result.disableAll();
+//
+//        // attributes
+//        result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
+//        result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
+//        result.enable( Capabilities.Capability.MISSING_VALUES );
+//
+//        // class
+//        result.enable(Capabilities.Capability.NOMINAL_CLASS);
+//        result.enable(Capabilities.Capability.MISSING_CLASS_VALUES);
+//
+//        // instances
+//        result.setMinimumNumberInstances(0);
+//
+//        return result;
+//        return null;
     }
 }
