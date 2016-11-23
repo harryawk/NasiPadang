@@ -5,6 +5,7 @@
  */
 package ffnn;
 
+import com.sun.xml.internal.bind.api.JAXBRIContext;
 import java.io.Serializable;
 import static java.lang.StrictMath.abs;
 import weka.classifiers.Classifier;
@@ -30,6 +31,7 @@ public class FFNN implements Classifier, Serializable {
     Instances datas;
     int number_attribute;
     double learning_rate;
+    double globalError;
     
     public FFNN(String filepath, int hidden_number, double lr) throws Exception {
         learning_rate = lr;
@@ -93,7 +95,7 @@ public class FFNN implements Classifier, Serializable {
                 hid_out.setNode(i, j, Node);
             }
         }
-        
+        globalError += epochError();
     }
     
     public double[] outRepresentation(double s) {
@@ -146,6 +148,15 @@ public class FFNN implements Classifier, Serializable {
             hide_error[i] = hid_out.getNode(i, 2).getValue()*(1-hid_out.getNode(i, 2).getValue())*sumError;
         }
     }
+    
+    public double epochError () {
+        double value = 0;
+        for (int i=0; i < outRep.length; i++){
+            double outSigmoidResult = hid_out.sigmoid(i);
+            value += Math.pow(outSigmoidResult-outRep[i],2);
+        }
+        return value/outRep.length;
+    }
 
     public double meanSquareError(double[] outRep) {
         double MSE = 0;
@@ -170,12 +181,12 @@ public class FFNN implements Classifier, Serializable {
     
     @Override
     public void buildClassifier(Instances ins) throws Exception {
-        double lr = 0.005;
-        int hidden_number = 8;
+        double lr = 0.001;
+        int hidden_number = 313;
         double MSE = 10;
         double pMSE = 1;
-        double lMSE = 1;
-        double threshold = 0.01;
+        double lMSE = 0;
+        double threshold = 0.00001;
         int counter = 0;
         int i = 0;
         
@@ -185,7 +196,8 @@ public class FFNN implements Classifier, Serializable {
         datas.setClassIndex(number_attribute - 1);//set label
         //row, jumlah atribut input + bias
         datas = filter(datas);
-        while (MSE - threshold > 0.001) {
+        globalError = 9999;
+        while (globalError > 1) {//(MSE - threshold > 0.00000000001) {
             if (counter == 0) {
                 in_hid = new oneLayer(number_attribute-1,hidden_number);
                 //row, jumlah hidden layer + bias
@@ -195,11 +207,21 @@ public class FFNN implements Classifier, Serializable {
                 out_error = new double[hid_out.getCol()];
             }
             i++;
-            for (int iter=0; iter < ins.numInstances(); i++){
+            globalError = 0;
+            for (int iter=0; iter < ins.numInstances(); iter++){
                 Instance data = ins.get(iter);
                 doForInstance(data);
             }
-            MSE = meanSquareError(outRep);
+            //MSE = meanSquareError(outRep);
+            System.out.println("iterasi "+i+" global error : "+globalError/2);
+            if (globalError/2 < 3) {
+                learning_rate = 0.0007;
+            } else if (globalError/2 < 1) {
+                learning_rate = 0.0005;
+            } else if (globalError/2 < 0) {
+                learning_rate = 0.0003;
+            }
+            
             if (abs(MSE-pMSE) < 0.000001) {
                 counter--;
             } else {
@@ -208,13 +230,14 @@ public class FFNN implements Classifier, Serializable {
             pMSE = MSE;
             if ((MSE-lMSE) < 0) {
                 lMSE = MSE;
-            }
+            } /*
             if (counter == 0){
                 threshold = (threshold*3+lMSE)/2;
-            }
+            } */
             if (threshold - lMSE > 0){
                 lMSE = threshold;
             }
+            
         }
     }
 

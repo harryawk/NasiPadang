@@ -25,7 +25,8 @@ public class RunFFNN {
         Classifier ffnn = new FFNN();
         Instances train = ConverterUtils.DataSource.read("e:\\Team.arff");
         Instances test = ConverterUtils.DataSource.read("e:\\Team_test.arff");
-        //Instances datas = ConverterUtils.DataSource.read("c:\\Program Files\\Weka-3-8\\data\\iris.arff");
+        //Instances train = ConverterUtils.DataSource.read("c:\\Program Files\\Weka-3-8\\data\\iris.arff");
+        //Instances test = ConverterUtils.DataSource.read("c:\\Program Files\\Weka-3-8\\data\\iris.arff");
         int number_attribute = train.numAttributes();
         train.setClassIndex(number_attribute - 1);//set label
         int number_attribute_a = test.numAttributes();
