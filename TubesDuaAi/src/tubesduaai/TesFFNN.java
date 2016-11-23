@@ -14,6 +14,8 @@ import weka.classifiers.Evaluation;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Normalize;
 
 /**
  *
@@ -31,14 +33,27 @@ public class TesFFNN {
         return eval;
     }
 
+    public static Instances filter(Instances x) throws Exception{
+        String[] options = new String[4];
+        options[0] = "-S";
+        options[1] = "1.0";
+        options[2] = "-T";
+        options[3] = "0.0";
+        Normalize dis = new Normalize();
+        dis.setOptions(options);
+        dis.setInputFormat(x);
+        return Filter.useFilter(x, dis);
+    }
+    
     public static void tes() throws Exception {
-        BufferedReader reader = new BufferedReader(new FileReader("C:\\Program Files\\Weka-3-8\\data\\iris.arff"));
+        BufferedReader reader = new BufferedReader(new FileReader("C:\\Program Files\\Weka-3-8\\data\\Team.arff"));
         data = new Instances(reader);
         reader.close();
         // setting class attribute
         data.setClassIndex(data.numAttributes() - 1);
         Instances dummy = null;
-        FFNN nn = new FFNN("C:\\Program Files\\Weka-3-8\\data\\iris.arff", 0);
+        data = filter(data);
+        FFNN nn = new FFNN(data, 0);
         boolean[] nom = nn.cek_nominal();
         System.out.println("ingin load?: ");
         String load = sc.nextLine();
@@ -54,19 +69,20 @@ public class TesFFNN {
             nn.print_perceptron();
         }
         System.out.println(eval.toSummaryString("\nResults\n======\n", false));
-        double[] attValues1 = {5.1, 3.5, 1.4, 0.2};
-        Instance i1 = new DenseInstance(1.0, attValues1);
-        double[] attValues2 = {7.0, 3.2, 4.7, 1.4};
-        Instance i2 = new DenseInstance(1.0, attValues2);
-        double[] attValues3 = {6.3, 3.3, 6.0, 2.5};
-        Instance i3 = new DenseInstance(1.0, attValues3);
-        i1.setDataset(data);
-        i2.setDataset(data);
-        i3.setDataset(data);
-        //hasil harusnya 0 1 2
-        System.out.println(nn.classifyInstance(i1));
-        System.out.println(nn.classifyInstance(i2));
-        System.out.println(nn.classifyInstance(i3));
+        System.out.println(eval.toMatrixString("Confusion Matrix\n=====\n"));
+//        double[] attValues1 = {5.1, 3.5, 1.4, 0.2};
+//        Instance i1 = new DenseInstance(1.0, attValues1);
+//        double[] attValues2 = {7.0, 3.2, 4.7, 1.4};
+//        Instance i2 = new DenseInstance(1.0, attValues2);
+//        double[] attValues3 = {6.3, 3.3, 6.0, 2.5};
+//        Instance i3 = new DenseInstance(1.0, attValues3);
+//        i1.setDataset(data);
+//        i2.setDataset(data);
+//        i3.setDataset(data);
+//        //hasil harusnya 0 1 2
+//        System.out.println(nn.classifyInstance(i1));
+//        System.out.println(nn.classifyInstance(i2));
+//        System.out.println(nn.classifyInstance(i3));
         System.out.println("ingin save?: ");
         String save = sc.nextLine();
         if (save.equalsIgnoreCase("y")) {
