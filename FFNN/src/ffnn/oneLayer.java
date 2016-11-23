@@ -5,11 +5,13 @@
  */
 package ffnn;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Toshiba
  */
-public class oneLayer {
+public class oneLayer implements Serializable {
     private node[][] layer;
     private int col; //node kanan layer
     private int row; //node kiri layer

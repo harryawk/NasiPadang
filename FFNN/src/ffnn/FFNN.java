@@ -5,6 +5,7 @@
  */
 package ffnn;
 
+import java.io.Serializable;
 import static java.lang.StrictMath.abs;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
@@ -12,17 +13,20 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Normalize;
 
 /**
  *
  * @author Toshiba
  */
-public class FFNN implements Classifier {
+public class FFNN implements Classifier, Serializable {
     
     private oneLayer in_hid;
     private oneLayer hid_out;
     private double[] out_error;
     private double[] hide_error;
+    private double[] outRep;
     Instances datas;
     int number_attribute;
     double learning_rate;
@@ -37,7 +41,7 @@ public class FFNN implements Classifier {
         //row, jumlah hidden layer + bias
         //col, jumlah nilai pada atribut output 
         hid_out = new oneLayer(hidden_number,datas.attribute(number_attribute - 1).numValues());
-        hide_error = new double[in_hid.getCol()];
+        hide_error = new double[in_hid.getCol()+1];
         out_error = new double[hid_out.getCol()];
     }
     
@@ -66,7 +70,6 @@ public class FFNN implements Classifier {
         }
         
         //Assign error
-        double[] outRep;
         outRep = outRepresentation(data.value(number_attribute-1));
         calOutError(outRep);
         calHideError();
@@ -103,6 +106,10 @@ public class FFNN implements Classifier {
                 temp[i] = 0;
             }
         }
+        /*
+        for (int i=0; i < temp.length ; i++){
+            System.out.println("CEKKKKKK "+ temp[i]);
+        } */
         return temp;
     }
     
@@ -140,29 +147,74 @@ public class FFNN implements Classifier {
         }
     }
 
+    public double meanSquareError(double[] outRep) {
+        double MSE = 0;
+        for(int i=0; i<hid_out.getCol(); i++){
+            double out = hid_out.sigmoid(i);
+            MSE += Math.pow((out-outRep[i]),2);
+        }
+        return MSE/hid_out.getCol();
+    }
+    
+    public static Instances filter(Instances x) throws Exception{
+        String[] options = new String[4];
+        options[0] = "-S";
+        options[1] = "1.0";
+        options[2] = "-T";
+        options[3] = "0.0";
+        Normalize dis = new Normalize();
+        dis.setOptions(options);
+        dis.setInputFormat(x);
+        return Filter.useFilter(x, dis);
+    }
+    
     @Override
     public void buildClassifier(Instances ins) throws Exception {
-        double lr = 0.3;
-        int hidden_number = 2;
+        double lr = 0.005;
+        int hidden_number = 8;
+        double MSE = 10;
+        double pMSE = 1;
+        double lMSE = 1;
+        double threshold = 0.01;
+        int counter = 0;
+        int i = 0;
         
         learning_rate = lr;
         this.datas = ins;
         number_attribute = datas.numAttributes();
         datas.setClassIndex(number_attribute - 1);//set label
         //row, jumlah atribut input + bias
-        in_hid = new oneLayer(number_attribute-1,hidden_number);
-        //row, jumlah hidden layer + bias
-        //col, jumlah nilai pada atribut output 
-        hid_out = new oneLayer(hidden_number,datas.attribute(number_attribute - 1).numValues());
-        hide_error = new double[in_hid.getCol()];
-        out_error = new double[hid_out.getCol()];
-        for (int i=0; i < 200000; i++) {
-            if (i%100 == 0){
-                System.out.println(i);
+        datas = filter(datas);
+        while (MSE - threshold > 0.001) {
+            if (counter == 0) {
+                in_hid = new oneLayer(number_attribute-1,hidden_number);
+                //row, jumlah hidden layer + bias
+                //col, jumlah nilai pada atribut output 
+                hid_out = new oneLayer(hidden_number,datas.attribute(number_attribute - 1).numValues());
+                hide_error = new double[in_hid.getCol()];
+                out_error = new double[hid_out.getCol()];
             }
-            int iter = i%(ins.numInstances());
-            Instance data = ins.get(iter);
-            doForInstance(data);
+            i++;
+            for (int iter=0; iter < ins.numInstances(); i++){
+                Instance data = ins.get(iter);
+                doForInstance(data);
+            }
+            MSE = meanSquareError(outRep);
+            if (abs(MSE-pMSE) < 0.000001) {
+                counter--;
+            } else {
+                counter++;
+            }
+            pMSE = MSE;
+            if ((MSE-lMSE) < 0) {
+                lMSE = MSE;
+            }
+            if (counter == 0){
+                threshold = (threshold*3+lMSE)/2;
+            }
+            if (threshold - lMSE > 0){
+                lMSE = threshold;
+            }
         }
     }
 
@@ -204,7 +256,7 @@ public class FFNN implements Classifier {
     @Override
     public double[] distributionForInstance(Instance instnc) throws Exception {
 	double temp = classifyInstance(instnc);
-        int x = 3;
+        int x = datas.attribute(number_attribute-1).numValues();
         double[] ret = new double[x];
         
         for (int i=0;i<x;i++){

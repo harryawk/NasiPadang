@@ -8,6 +8,7 @@ package ffnn;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.J48;
+import weka.core.Debug;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils;
 
@@ -22,19 +23,27 @@ public class RunFFNN {
      */
     public static void main(String[] args) throws Exception {
         Classifier ffnn = new FFNN();
-        Instances datas = ConverterUtils.DataSource.read("c:\\Program Files\\Weka-3-8\\data\\iris.arff");
-        int number_attribute = datas.numAttributes();
-        datas.setClassIndex(number_attribute - 1);//set label
-        ffnn.buildClassifier(datas);
+        Instances train = ConverterUtils.DataSource.read("e:\\Team.arff");
+        Instances test = ConverterUtils.DataSource.read("e:\\Team_test.arff");
+        //Instances datas = ConverterUtils.DataSource.read("c:\\Program Files\\Weka-3-8\\data\\iris.arff");
+        int number_attribute = train.numAttributes();
+        train.setClassIndex(number_attribute - 1);//set label
+        int number_attribute_a = test.numAttributes();
+        test.setClassIndex(number_attribute_a - 1);//set label
+        try {
+            FFNN.filter(test);
+        } catch (Exception e) {
+            
+        }
+        ffnn.buildClassifier(train);
         
-        Evaluation eval = new Evaluation(datas);
-        eval.evaluateModel(ffnn, datas);
+        Evaluation eval = new Evaluation(test);
+        eval.evaluateModel(ffnn, test);
         System.out.println("=====Run Information======");
         System.out.println("======Classifier Model======");
-        //System.out.println(ffnn.toString());
         System.out.println(eval.toSummaryString("====Stats======\n", false));
-        //System.out.println(eval.toClassDetailsString("====Detailed Result=====\n"));
-        //System.out.println(eval.toMatrixString("======Confusion Matrix======\n"));
+        System.out.println(eval.toClassDetailsString("====Detailed Result=====\n"));
+        System.out.println(eval.toMatrixString("======Confusion Matrix======\n")); 
     }
     
 }

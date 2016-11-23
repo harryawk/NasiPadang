@@ -5,13 +5,14 @@
  */
 package ffnn;
 
+import java.io.Serializable;
 import java.util.Random;
 
 /**
  *
  * @author Toshiba
  */
-public class node {
+public class node implements Serializable{
     private double weight;
     private double value;
     
