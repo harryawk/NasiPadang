@@ -26,6 +26,7 @@ import weka.filters.supervised.attribute.Discretize;
 public class NB_030 implements Classifier, Serializable {
     
     public Instances datas;
+    public Instances data_test;
     public double[][] temp;
     public HashMap<String, Float> map;
     public String[][] string;
@@ -39,23 +40,44 @@ public class NB_030 implements Classifier, Serializable {
     
     public void Discretize() throws Exception {
         Discretize discretize = new Discretize();
+        String[] options = new String[6];
+//        options[0] = "-R";                                    
+//        options[1] = "first-last";
+//        options[2] = "-precision";
+//        options[3] = "6";
+/////////////////////////////////////
+//        options[0] = "-B";
+//        options[1] = "10";
+//        options[2] = "-M";
+//        options[3] = "-1.0";
+//        options[4] = "-R";
+//        options[5] = "first-last";
+//        discretize.setOptions(options);
+/////////////////////////////////////////
 //        String[] options = new String[1];
 //        options[0] = "-o";
 //        options[1] = "6";
 //        options[2] = "-precision";
 //        options[3] = "6";
 //        discretize.setOptions(options);
+//        discretize.setUseBetterEncoding(true);
+//        System.out.println(discretize.useBinNumbersTipText());
         discretize.setInputFormat(datas);
         datas = Filter.useFilter(datas,discretize);
     }
     
-    public void DataRead(String filepath, int index) throws Exception {
-        datas = DataSource.read(filepath);
-        datas.setClassIndex(index);
+    public void DataRead(String filepath, int index, int test) throws Exception {
+        if (test == 0) {
+            datas = DataSource.read(filepath);
+            datas.setClassIndex(index);
 
-//        datas.setClassIndex(datas.numAttributes()-1);
-        string = new String[datas.numAttributes()][];
-        NUM_LABELS = datas.numClasses();
+    //        datas.setClassIndex(datas.numAttributes()-1);
+            string = new String[datas.numAttributes()][];
+            NUM_LABELS = datas.numClasses();
+        } else {
+            data_test = DataSource.read(filepath);
+            data_test.setClassIndex(index);
+        }
     }
         
     public String[] distinctVals(int index) {
@@ -84,7 +106,7 @@ public class NB_030 implements Classifier, Serializable {
         for (int j=0; j < datas.numAttributes(); j++) {
             if (j != datas.classIndex()) {
                 String[] distincts = distinctVals(j);
-                System.out.println(datas.get(j).attribute(j));
+//                System.out.println(datas.get(j).attribute(j));
                 for (int m=0; m < distincts.length; m++) {
                     for (int i=0; i < NUM_LABELS; i++) {
                         map.put(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i), new Float(1));
@@ -92,27 +114,28 @@ public class NB_030 implements Classifier, Serializable {
                 }
             }
         }
-////DEBUGGING : ////////////////////////////////////LOOOOOOOOPPPP>????????//////////////////////        
-        System.out.println("Before : ");
-        System.out.println("==============================================");
-//        for (int j=0; j < datas.numAttributes()-1; j++) {
-        for (int j=0; j < datas.numAttributes(); j++) {
-            if (j != datas.classIndex()) {
-                String[] distincts = distinctVals(j);
-                System.out.println(datas.attribute(j).name());
-                for (int m=0; m < distincts.length; m++) {
-                    for (int i=0; i < NUM_LABELS; i++) {
-                        System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i)));
-                        System.out.print(" ");
-                    }
-                    System.out.println();
-                }
-            }
-        }
-        System.out.println("====================================================");
-////DEBUGGING : ///////////////////////////LOOOOPPPPP/////////////////////////////////////////
-        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-        System.out.println(datas.get(0).attribute(0).name());
+        System.out.println("atribute 2 : " + datas.get(0).stringValue(12));
+////DEBUGGING : /////////FOR DEBUG PURPOSE///////////////////////////LOOOOOOOOPPPP>????????//////////////////////        
+//        System.out.println("Before : ");
+//        System.out.println("==============================================");
+////        for (int j=0; j < datas.numAttributes()-1; j++) {
+//        for (int j=0; j < datas.numAttributes(); j++) {
+//            if (j != datas.classIndex()) {
+//                String[] distincts = distinctVals(j);
+//                System.out.println(datas.attribute(j).name());
+//                for (int m=0; m < distincts.length; m++) {
+//                    for (int i=0; i < NUM_LABELS; i++) {
+//                        System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i)));
+//                        System.out.print(" ");
+//                    }
+//                    System.out.println();
+//                }
+//            }
+//        }
+//        System.out.println("====================================================");
+////DEBUGGING : ///////////////////////////FOR DEBUG PURPOSE///////////////////////////////////////
+//        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+//        System.out.println(datas.get(0).attribute(0).name());
 //        System.out.println(datas.attribute(1).name());
 //        System.out.println(datas.attribute(2).name());
 //        System.out.println(datas.attribute(3).name());
@@ -123,8 +146,8 @@ public class NB_030 implements Classifier, Serializable {
         for (int j=0; j < datas.numClasses(); j++) {
             num[j] = new Float(0);
         }
-        System.out.println("mapping "+ datas.classAttribute().value(0));
-        System.out.println("mapping "+ datas.classAttribute().value(1));
+//        System.out.println("mapping "+ datas.classAttribute().value(0));
+//        System.out.println("mapping "+ datas.classAttribute().value(1));
 //        System.out.println("mapping "+ datas.classAttribute().value(2));
         for (int k=0; k < datas.numInstances(); k++) {
             for (int i=0; i < NUM_LABELS; i++) {
@@ -164,22 +187,24 @@ public class NB_030 implements Classifier, Serializable {
         for (int j=0; j < datas.numAttributes(); j++) {
             if (j != datas.classIndex()) {
                 String[] distincts = distinctVals(j);
-                System.out.println(datas.attribute(j).name());
+//                System.out.println(datas.attribute(j).name());
                 for (int m=0; m < distincts.length; m++) {
                     for (int i=0; i < NUM_LABELS; i++) {
     //                  System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(0)));
                         y = map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i));
-                        System.out.println(y/num[i]);
+//                        FOR DEBUG PURPOSE
+//                        System.out.println(y/num[i]);
+                        ///////////////////////////////
                         map.put(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i), y/num[i]);
                     }
                 }
             }
         }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        System.out.println("somesome");
-        System.out.println(num[0]);
-        System.out.println(num[1]);
+///////FOR DEBUG PURPOSE//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//        System.out.println("somesome");
+//        System.out.println(num[0]);
+//        System.out.println(num[1]);
 //        System.out.println(num[2]);
 ///////////////////////////CALCULATING ACCURACY///////////////////////////////////////////////
 //        for (int i=0; i < datas.numInstances(); i++) {
@@ -190,25 +215,25 @@ public class NB_030 implements Classifier, Serializable {
 //            }
 //        }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////FOR DEBUG PURPOSE////////////////////////////////////////////////////////////////////////////////////////////
 /////DEBUGGING : ////////////////////////////////ENDDOFMAPPING//////////////////////////////////////
-        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-        System.out.println("After : ");
-        System.out.println("==========================");
+//        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+//        System.out.println("After : ");
+//        System.out.println("==========================");
         for (int j=0; j < datas.numAttributes(); j++) {
             if (j != datas.classIndex()) {
                 String[] distincts = distinctVals(j);
-                System.out.println(datas.attribute(j).name());
+//                System.out.println(datas.attribute(j).name());
                 for (int m=0; m < distincts.length; m++) {
                     for (int i=0; i < NUM_LABELS; i++) {
-                        System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i)));
-                        System.out.print(" ");
+//                        System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i)));
+//                        System.out.print(" ");
                     }
-                    System.out.println();
+//                    System.out.println();
                 }
             }
         }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////FOR DEBUG PURPOSE/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         ////////////////// CALCULATE ACCURACY AND CLASSIFY ACCURACY //////////////////////////////////
         /////////////////MEMASUKKAN KELAS MENURUT MODEL KE ARRAY
 //        Double[] hasilTraining = new Double[datas.numInstances()];
@@ -238,7 +263,7 @@ public class NB_030 implements Classifier, Serializable {
 //        for (int i=0; i < datas.numInstances(); i++) {
 ////            if (datas.get(i).stringValue(datas.classIndex()) == )
 //        }
-       System.out.println("keluar method");
+//       System.out.println("keluar method");
 //////END OF METHOD////////////////////////////////////////////////////////////////////////////////////////////
     }
 
