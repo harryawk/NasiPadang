@@ -9,10 +9,13 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static jdk.nashorn.internal.objects.NativeArray.map;
 import static jdk.nashorn.internal.objects.NativeDebug.map;
 import weka.classifiers.AbstractClassifier;
@@ -54,35 +57,37 @@ public class NB_030 extends AbstractClassifier implements Classifier, Serializab
                 System.out.println(datas.attribute(j).name());
                     for (int m=0; m < distincts.length; m++) {
                         for (int i=0; i < NUM_LABELS; i++) {
-                            bw.write(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i)).toString());
+                            bw.write(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i));
                             bw.write(" ");
+                            bw.write(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i)).toString());
+                            bw.write("\n");
                         }
-                        bw.write("\n");
                     }
                 }
             }
+            bw.flush();
             bw.close();
         } catch (Exception e) {
             System.out.println(e);
         }
     }
 
-    public void load_model() {
+    public void load_model(String path) {
+        
         try {
-            FileReader file = new FileReader("coba2.txt");
-            BufferedReader br = new BufferedReader(file);
+//            FileReader file = new FileReader(path);
+//            FileReader file = new FileReader("coba2.txt");
+            BufferedReader br = new BufferedReader(new FileReader(path));
             String temp;
-            int i=0;
             while ((temp = br.readLine()) != null){
                 String[] part = temp.split(" ");
-                for (int j=0;j<part.length;j++) {
-                    perceptron.get(i).get(j).weight = Double.parseDouble(part[j]);
-                }
-                System.out.println();
-                i++;
+                // pasti 2
+                map.put(part[0], Float.parseFloat(part[1]));
+                System.out.println(part[0] + " , " + map.get(part[0]));
             }
+//            file.close();
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
     
@@ -375,13 +380,13 @@ public class NB_030 extends AbstractClassifier implements Classifier, Serializab
     @Override
     public double[] distributionForInstance(Instance instnc) throws Exception {
         double temp = classifyInstance(instnc);
-        int x = data_test.classAttribute().numValues();
+        int x = datas.classAttribute().numValues();
         double[] ret = new double[x];
         
         for (int i=0;i<x;i++){
             ret[i] = (1-0.5)/(x-1);
         }
-        ret[(int) temp] = 0.2;
+        ret[(int) temp] = 0.7;
         return ret;
     }
 
