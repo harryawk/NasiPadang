@@ -26,6 +26,7 @@ import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Discretize;
+import weka.filters.unsupervised.attribute.NumericToNominal;
 
 
 /**
@@ -92,7 +93,7 @@ public class NB_030 extends AbstractClassifier implements Classifier, Serializab
     }
     
     public void Discretize(String instncs) throws Exception {
-        Discretize discretize = new Discretize();
+        NumericToNominal discretize = new NumericToNominal();
         String[] options = new String[6];
 //        options[0] = "-R";                                    
 //        options[1] = "first-last";
@@ -277,23 +278,23 @@ public class NB_030 extends AbstractClassifier implements Classifier, Serializab
 
 ///////FOR DEBUG PURPOSE////////////////////////////////////////////////////////////////////////////////////////////
 /////DEBUGGING : ////////////////////////////////ENDDOFMAPPING//////////////////////////////////////
-        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-        System.out.println("After : ");
-        System.out.println("==========================");
-        for (int j=0; j < datas.numAttributes(); j++) {
-            if (j != datas.classIndex()) {
-                String[] distincts = distinctVals(j);
-                System.out.println(datas.attribute(j).name());
-                for (int m=0; m < distincts.length; m++) {
-                    for (int i=0; i < NUM_LABELS; i++) {
-                        System.out.print(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i) +  " ");
-                        System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i)));
-                        System.out.print(" ");
-                    }
-                    System.out.println();
-                }
-            }
-        }
+//        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+//        System.out.println("After : ");
+//        System.out.println("==========================");
+//        for (int j=0; j < datas.numAttributes(); j++) {
+//            if (j != datas.classIndex()) {
+//                String[] distincts = distinctVals(j);
+//                System.out.println(datas.attribute(j).name());
+//                for (int m=0; m < distincts.length; m++) {
+//                    for (int i=0; i < NUM_LABELS; i++) {
+//                        System.out.print(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i) +  " ");
+//                        System.out.print(map.get(datas.attribute(j).name()+distincts[m]+datas.classAttribute().value(i)));
+//                        System.out.print(" ");
+//                    }
+//                    System.out.println();
+//                }
+//            }
+//        }
 ////////FOR DEBUG PURPOSE/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         ////////////////// CALCULATE ACCURACY AND CLASSIFY ACCURACY //////////////////////////////////
         /////////////////MEMASUKKAN KELAS MENURUT MODEL KE ARRAY
@@ -331,6 +332,7 @@ public class NB_030 extends AbstractClassifier implements Classifier, Serializab
     @Override
     public double classifyInstance(Instance instnc) throws Exception {
         // Pengklasifikasi instance baru
+        System.out.println("instnc : " + instnc.toString());
         int NUM_CLASSES = datas.classAttribute().numValues();
 //        System.out.println("------------------------------");
 //        System.out.println(datas.get(1));
@@ -345,7 +347,7 @@ public class NB_030 extends AbstractClassifier implements Classifier, Serializab
             temp = ((new Double(num[i]))/datas.numInstances());
             for (int j=0; j < datas.numAttributes(); j++) {
                 if (j != datas.classIndex()) {
-//                    System.out.print("temp = "+ temp + " ; i = " + i + " ; j = " + j + " ; name = " + instnc.attribute(30).name() + " ; value = " + instnc.stringValue(30));
+//                    System.out.println("temp = "+ temp + " ; i = " + i + " ; j = " + j + " ; name = " + instnc.attribute(30).name() + " ; value = " + instnc.stringValue(30));
 //                    System.out.println(" ; debug : " + instnc.classAttribute().value(1));
 ////                    System.out.println("i = " + i);
 ////                    System.out.println("j = " + j);
@@ -354,8 +356,8 @@ public class NB_030 extends AbstractClassifier implements Classifier, Serializab
 ////                    System.out.println("--------------");
 ////                    System.out.println(datas.classAttribute().value(i));
 //                    System.out.print("instnc.attribute("+j+").name()+instnc.stringValue("+j+")+instnc.classAttribute().value("+i + ") ");
-                    System.out.print(instnc.attribute(j).name()+instnc.stringValue(j)+instnc.classAttribute().value(i));
-                    System.out.println(map.get(instnc.attribute(j).name()+instnc.stringValue(j)+instnc.classAttribute().value(i)));
+                    System.out.println(instnc.attribute(j).name()+instnc.stringValue(j)+instnc.classAttribute().value(i));
+//                    System.out.println(map.get(instnc.attribute(j).name()+instnc.stringValue(j)+instnc.classAttribute().value(i)));
                     
                     temp *= map.get(instnc.attribute(j).name()+instnc.stringValue(j)+instnc.classAttribute().value(i));
                 }

@@ -27,8 +27,8 @@ public class TubesDuaAi {
         Integer classidx = s.nextInt();
 //        nb.load_model("C:\\Users\\harry\\GitHub\\NasiPadang\\TubesDuaAi\\coba2.txt");
 //        nb.DataRead("C:\\Users\\harry\\Downloads\\mush.arff", classidx, 0);
-//        nb.DataRead("C:\\Users\\harry\\Documents\\assignments\\ai\\student-train.arff", classidx, 0);
-        nb.DataRead("C:\\Users\\harry\\Documents\\assignments\\ai\\student-train.arff", 26, 0);
+        nb.DataRead("C:\\Users\\harry\\Documents\\assignments\\ai\\student-train.arff", classidx, 0);
+//        nb.DataRead("C:\\Users\\harry\\Documents\\assignments\\ai\\student-train.arff", 26, 0);
 //        nb.DataRead("C:\\Users\\harry\\Documents\\assignments\\ai\\mush_test.arff", classidx, 1);
 //        nb.buildClassifier(dummy);
 //        int trainSize = (int) Math.round(nb.datas.numInstances() * 0.8);
@@ -42,20 +42,20 @@ public class TubesDuaAi {
         
         nb.buildClassifier(dummy);
         
-//        nb.save_model();
+        nb.save_model();
 //        nb.DataRead("C:\\Users\\harry\\Documents\\assignments\\ai\\mush_test.arff", classidx, 1);
         
-//        nb.DataRead("C:\\Users\\harry\\Documents\\assignments\\ai\\student-mat-test.arff", classidx, 1);
+        nb.DataRead("C:\\Users\\harry\\Documents\\assignments\\ai\\student-mat-test.arff", classidx, 1);
         
 //        double x = nb.classifyInstance(nb.datas.instance(0));
 //        Evaluation eval = new Evaluation(nb.datas);
 //        nb.data_test = test;
 //        nb.data_test.setClassIndex(classidx);
 //        nb.Discretize("data_test");
-        Evaluation eval = new Evaluation(nb.datas);
-        eval.crossValidateModel(nb, nb.datas, 10, new Random(1));
+        Evaluation eval = new Evaluation(nb.data_test);
+//        eval.crossValidateModel(nb, nb.datas, 10, new Random(1));
         
-        eval.evaluateModel(nb, nb.datas);
+        eval.evaluateModel(nb, nb.data_test);
 ////        System.out.println(eval.toSummaryString("=====Sumarry====", true));
         
         System.out.println(eval.toSummaryString("=====Sumarry=======", true));
